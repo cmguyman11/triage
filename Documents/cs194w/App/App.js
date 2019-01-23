@@ -1,11 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 
 export default class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>ROLL THRU</Text>
+        <Image style={styles.logo}
+            source={require("./assets/pictures/logo.png")}
+          />
       </View>
     );
   }
@@ -17,5 +19,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: '100%'
   },
+  logo: {
+    width: "85%",
+    height: "40%"
+  }
 });
