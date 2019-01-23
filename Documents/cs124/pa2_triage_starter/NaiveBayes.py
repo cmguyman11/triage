@@ -3,6 +3,7 @@ import getopt
 import os
 import math
 import operator
+from timeit import default_timer as timer
 
 class NaiveBayes:
     class TrainSplit:
@@ -33,6 +34,11 @@ class NaiveBayes:
         self.num_docs = 0
         self.num_aid_docs = 0
         self.num_notaid_docs = 0
+        self.timesRan = 0
+        self.logprior_aid = 0
+        self.logprior_not = 0
+        self.count_aid = {}
+        self.count_not = {}
         #TODO: add other data structures needed in classify() and/or addExample() below
         
 
@@ -55,29 +61,45 @@ class NaiveBayes:
         if self.FILTER_STOP_WORDS:
             words = self.filterStopWords(words)
 
-        logprior_aid = math.log(self.num_aid_docs/self.num_docs)
-        logprior_not = math.log(self.num_notaid_docs/self.num_docs)
+        # first time, find all counts and add them to a dictionary
+        if self.timesRan == 0:
+            self.logprior_aid = math.log(self.num_aid_docs/self.num_docs)
+            self.logprior_not = math.log(self.num_notaid_docs/self.num_docs)
+            for v in self.vocab:
+                numAid = self.aid.count(v)
+                numNot = self.notaid.count(v)
+                self.count_aid[v] = numAid
+                self.count_not[v] = numNot
 
-        p_aid = logprior_aid
-        p_not = logprior_not
+        self.timesRan +=1
+
+        p_aid = self.logprior_aid
+        p_not = self.logprior_not
 
         for w in words:
-            count_aid = self.aid.count(w)
-            count_not = self.notaid.count(w)
-            logliklihood_aid = math.log((count_aid + 1)/(len(self.aid) + len(self.vocab)))
-            logliklihood_not = math.log((count_not + 1)/(len(self.notaid) + len(self.vocab)))
+            numAid = 0
+            if w in self.count_aid:
+                numAid = self.count_aid[w]
+            numNot = 0
+            if w in self.count_not:
+                numNot = self.count_not[w]
+
+            logliklihood_aid = math.log((numAid + 1)/(len(self.aid) + len(self.vocab)))
+            logliklihood_not = math.log((numNot + 1)/(len(self.notaid) + len(self.vocab)))
 
             p_aid += logliklihood_aid
             p_not += logliklihood_not
+
         if p_aid > p_not:
             return 'aid'
         else:
             return 'not'
     
     # round 1: Train Accuracy: 0.82946878266654
-#Dev Accuracy: 0.731441896618733
+    # Dev Accuracy: 0.731441896618733
 
     def addExample(self, klass, words):
+        self.timesRan = 0
         if self.FILTER_STOP_WORDS:
             words = self.filterStopWords(words)
 
@@ -189,6 +211,7 @@ def calculate_accuracy(dataset,classifier):
 
         
 def main():
+    start = timer()
     FILTER_STOP_WORDS = False
     USE_BIGRAMS = False
     (options, args) = getopt.getopt(sys.argv[1:], 'fb')
@@ -198,6 +221,8 @@ def main():
       USE_BIGRAMS = True
 
     evaluate(FILTER_STOP_WORDS,USE_BIGRAMS)
+    elapsed_time = timer() - start # in seconds
+    print(elapsed_time)
 
 if __name__ == "__main__":
         main()
