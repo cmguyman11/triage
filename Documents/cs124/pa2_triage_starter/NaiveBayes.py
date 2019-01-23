@@ -52,6 +52,9 @@ class NaiveBayes:
         """ TODO
             'words' is a list of words to classify. Return 'aid' or 'not' classification.
         """
+        if self.FILTER_STOP_WORDS:
+            words = self.filterStopWords(words)
+
         logprior_aid = math.log(self.num_aid_docs/self.num_docs)
         logprior_not = math.log(self.num_notaid_docs/self.num_docs)
 
@@ -71,8 +74,13 @@ class NaiveBayes:
         else:
             return 'not'
     
+    # round 1: Train Accuracy: 0.82946878266654
+#Dev Accuracy: 0.731441896618733
 
     def addExample(self, klass, words):
+        if self.FILTER_STOP_WORDS:
+            words = self.filterStopWords(words)
+
         self.num_docs+=1
         if klass == 'aid':
             self.num_aid_docs+=1
