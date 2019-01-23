@@ -27,6 +27,9 @@ class NaiveBayes:
         self.USE_BIGRAMS = False
         self.BEST_MODEL = False
         self.stopList = set(self.readFile('data/english.stop'))
+        self.aid = [] #will want size of this
+        self.notaid = [] #will want size of this
+        self.vocab = set() #for the total vocabulary
         #TODO: add other data structures needed in classify() and/or addExample() below
         
 
@@ -46,12 +49,18 @@ class NaiveBayes:
         """ TODO
             'words' is a list of words to classify. Return 'aid' or 'not' classification.
         """
-        
 
         return 'aid'
     
 
     def addExample(self, klass, words):
+        for w in words:
+            if klass == 'aid':
+                    self.aid.append(w)
+            else:
+                self.notaid.append(w)
+            self.vocab.add(w)
+
         """
          * TODO
          * Train your model on an example document with label klass ('aid' or 'not') and
@@ -125,6 +134,10 @@ def evaluate(FILTER_STOP_WORDS,USE_BIGRAMS):
    
     for example in split.train:
         classifier.addExample(example.klass,example.words)
+        
+    # print('aid length: ' + str(len(classifier.aid)))
+    # print('not aid length: ' + str(len(classifier.notaid)))
+    # print(' words in vocab: ' + str(len(classifier.vocab)))
 
     train_accuracy = calculate_accuracy(split.train,classifier)
     dev_accuracy = calculate_accuracy(split.dev,classifier)
