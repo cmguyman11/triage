@@ -30,6 +30,9 @@ class NaiveBayes:
         self.aid = [] #will want size of this
         self.notaid = [] #will want size of this
         self.vocab = set() #for the total vocabulary
+        self.num_docs = 0
+        self.num_aid_docs = 0
+        self.num_notaid_docs = 0
         #TODO: add other data structures needed in classify() and/or addExample() below
         
 
@@ -49,17 +52,39 @@ class NaiveBayes:
         """ TODO
             'words' is a list of words to classify. Return 'aid' or 'not' classification.
         """
+        logprior_aid = math.log(self.num_aid_docs/self.num_docs)
+        logprior_not = math.log(self.num_notaid_docs/self.num_docs)
 
-        return 'aid'
+        p_aid = logprior_aid
+        p_not = logprior_not
+
+        for w in words:
+            count_aid = self.aid.count(w)
+            count_not = self.notaid.count(w)
+            logliklihood_aid = math.log((count_aid + 1)/(len(self.aid) + len(self.vocab)))
+            logliklihood_not = math.log((count_not + 1)/(len(self.notaid) + len(self.vocab)))
+
+            p_aid += logliklihood_aid
+            p_not += logliklihood_not
+        if p_aid > p_not:
+            return 'aid'
+        else:
+            return 'not'
     
 
     def addExample(self, klass, words):
+        self.num_docs+=1
+        if klass == 'aid':
+            self.num_aid_docs+=1
+        else:
+            self.num_notaid_docs+=1
         for w in words:
             if klass == 'aid':
-                    self.aid.append(w)
-            else:
+                self.aid.append(w)
+            elif klass == 'not':
                 self.notaid.append(w)
             self.vocab.add(w)
+
 
         """
          * TODO
@@ -134,10 +159,7 @@ def evaluate(FILTER_STOP_WORDS,USE_BIGRAMS):
    
     for example in split.train:
         classifier.addExample(example.klass,example.words)
-        
-    # print('aid length: ' + str(len(classifier.aid)))
-    # print('not aid length: ' + str(len(classifier.notaid)))
-    # print(' words in vocab: ' + str(len(classifier.vocab)))
+
 
     train_accuracy = calculate_accuracy(split.train,classifier)
     dev_accuracy = calculate_accuracy(split.dev,classifier)
