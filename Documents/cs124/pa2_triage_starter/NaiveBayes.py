@@ -61,17 +61,18 @@ class NaiveBayes:
         if self.FILTER_STOP_WORDS:
             words = self.filterStopWords(words)
 
+        if not self.USE_BIGRAMS:
         # first time, find all counts and add them to a dictionary
-        if self.timesRan == 0:
-            self.logprior_aid = math.log(self.num_aid_docs/self.num_docs)
-            self.logprior_not = math.log(self.num_notaid_docs/self.num_docs)
-            for v in self.vocab:
-                numAid = self.aid.count(v)
-                numNot = self.notaid.count(v)
-                self.count_aid[v] = numAid
-                self.count_not[v] = numNot
+            if self.timesRan == 0:
+                self.logprior_aid = math.log(self.num_aid_docs/self.num_docs)
+                self.logprior_not = math.log(self.num_notaid_docs/self.num_docs)
+                for v in self.vocab:
+                    numAid = self.aid.count(v)
+                    numNot = self.notaid.count(v)
+                    self.count_aid[v] = numAid
+                    self.count_not[v] = numNot
 
-        self.timesRan +=1
+            self.timesRan +=1
 
         p_aid = self.logprior_aid
         p_not = self.logprior_not
@@ -89,11 +90,11 @@ class NaiveBayes:
                     if bigram in self.count_not:
                         numNot = self.count_not[bigram]
 
-                    logliklihood_aid = math.log((numAid + 1)/(len(self.aid) + len(self.vocab)))
-                    logliklihood_not = math.log((numNot + 1)/(len(self.notaid) + len(self.vocab)))
+                        logliklihood_aid = math.log((numAid + 1)/(len(self.aid) + len(self.vocab)))
+                        logliklihood_not = math.log((numNot + 1)/(len(self.notaid) + len(self.vocab)))
 
-                    p_aid += logliklihood_aid
-                    p_not += logliklihood_not
+                        p_aid += logliklihood_aid
+                        p_not += logliklihood_not
                 i+=1
         else:
             for w in words:
@@ -137,8 +138,16 @@ class NaiveBayes:
                     bigram = (words[i-1], words[i])
                     if klass == 'aid':
                         self.aid.append(bigram)
+                        if bigram in self.count_aid:
+                            self.count_aid[bigram] = self.count_aid[bigram] + 1
+                        else:
+                            self.count_aid[bigram] = 1
                     elif klass == 'not':
                         self.notaid.append(bigram)
+                        if bigram in self.count_not:
+                            self.count_not[bigram] = self.count_not[bigram] + 1
+                        else:
+                            self.count_not[bigram] = 1
                     self.vocab.add(bigram)
                 i+=1
         else:
