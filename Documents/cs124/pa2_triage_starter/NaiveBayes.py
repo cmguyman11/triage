@@ -76,19 +76,39 @@ class NaiveBayes:
         p_aid = self.logprior_aid
         p_not = self.logprior_not
 
-        for w in words:
-            numAid = 0
-            if w in self.count_aid:
-                numAid = self.count_aid[w]
-            numNot = 0
-            if w in self.count_not:
-                numNot = self.count_not[w]
+        if self.USE_BIGRAMS:
+            i = 0
+            words = ['<s>'] + words + ['</s>']
+            for w in words:
+                if i != 0:
+                    bigram = (words[i-1], words[i])
+                    numAid = 0
+                    if bigram in self.count_aid:
+                        numAid = self.count_aid[bigram]
+                    numNot = 0
+                    if bigram in self.count_not:
+                        numNot = self.count_not[bigram]
 
-            logliklihood_aid = math.log((numAid + 1)/(len(self.aid) + len(self.vocab)))
-            logliklihood_not = math.log((numNot + 1)/(len(self.notaid) + len(self.vocab)))
+                    logliklihood_aid = math.log((numAid + 1)/(len(self.aid) + len(self.vocab)))
+                    logliklihood_not = math.log((numNot + 1)/(len(self.notaid) + len(self.vocab)))
 
-            p_aid += logliklihood_aid
-            p_not += logliklihood_not
+                    p_aid += logliklihood_aid
+                    p_not += logliklihood_not
+                i+=1
+        else:
+            for w in words:
+                numAid = 0
+                if w in self.count_aid:
+                    numAid = self.count_aid[w]
+                numNot = 0
+                if w in self.count_not:
+                    numNot = self.count_not[w]
+
+                logliklihood_aid = math.log((numAid + 1)/(len(self.aid) + len(self.vocab)))
+                logliklihood_not = math.log((numNot + 1)/(len(self.notaid) + len(self.vocab)))
+
+                p_aid += logliklihood_aid
+                p_not += logliklihood_not
 
         if p_aid > p_not:
             return 'aid'
@@ -108,12 +128,26 @@ class NaiveBayes:
             self.num_aid_docs+=1
         else:
             self.num_notaid_docs+=1
-        for w in words:
-            if klass == 'aid':
-                self.aid.append(w)
-            elif klass == 'not':
-                self.notaid.append(w)
-            self.vocab.add(w)
+
+        if self.USE_BIGRAMS:
+            i = 0
+            words = ['<s>'] + words + ['</s>']
+            for w in words:
+                if i != 0:
+                    bigram = (words[i-1], words[i])
+                    if klass == 'aid':
+                        self.aid.append(bigram)
+                    elif klass == 'not':
+                        self.notaid.append(bigram)
+                    self.vocab.add(bigram)
+                i+=1
+        else:
+            for w in words:
+                if klass == 'aid':
+                    self.aid.append(w)
+                elif klass == 'not':
+                    self.notaid.append(w)
+                self.vocab.add(w)
 
 
         """
