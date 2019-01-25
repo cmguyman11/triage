@@ -66,11 +66,11 @@ class NaiveBayes:
             if self.timesRan == 0:
                 self.logprior_aid = math.log(self.num_aid_docs/self.num_docs)
                 self.logprior_not = math.log(self.num_notaid_docs/self.num_docs)
-                for v in self.vocab:
-                    numAid = self.aid.count(v)
-                    numNot = self.notaid.count(v)
-                    self.count_aid[v] = numAid
-                    self.count_not[v] = numNot
+                # for v in self.vocab:
+                #     numAid = self.aid.count(v)
+                #     numNot = self.notaid.count(v)
+                #     self.count_aid[v] = numAid
+                #     self.count_not[v] = numNot
 
             self.timesRan +=1
 
@@ -154,8 +154,16 @@ class NaiveBayes:
             for w in words:
                 if klass == 'aid':
                     self.aid.append(w)
+                    if w in self.count_aid:
+                        self.count_aid[w] = self.count_aid[w] + 1
+                    else:
+                        self.count_aid[w] = 1
                 elif klass == 'not':
                     self.notaid.append(w)
+                    if w in self.count_not:
+                        self.count_not[w] = self.count_not[w] + 1
+                    else:
+                        self.count_not[w] = 1
                 self.vocab.add(w)
 
 
